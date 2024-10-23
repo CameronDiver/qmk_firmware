@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include QMK_KEYBOARD_H
 
+#include "quantum/wpm.h"
+
 enum sofle_layers {
     /* _M_XYZ = Mac Os, _W_XYZ = Win/Linux */
     _QWERTY,
@@ -231,12 +233,14 @@ void print_status_narrow_user(void) {
         case _LOWER:
             oled_write_P(PSTR("Lower"), false);
             break;
+        case _ADJUST:
+            oled_write_P(PSTR("Adjust"), false);
         default:
             oled_write_ln_P(PSTR("Undef"), false);
     }
     oled_write_P(PSTR("\n\n"), false);
-    led_t led_usb_state = host_keyboard_led_state();
-    oled_write_ln_P(PSTR("CPSLK"), led_usb_state.caps_lock);
+    oled_write_P(PSTR("WPM: "), false);
+    oled_write(get_u8_str(get_current_wpm(), ' '), false);
 }
 
 bool oled_task_user(void) {
