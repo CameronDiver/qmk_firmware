@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include QMK_KEYBOARD_H
 
-#include "quantum/wpm.h"
-
-#include "luna.c"
-
 enum sofle_layers {
     /* _M_XYZ = Mac Os, _W_XYZ = Win/Linux */
     _QWERTY,
@@ -19,7 +15,8 @@ enum custom_keycodes {
     KC_PRVWD,
     KC_NXTWD,
     KC_LSTRT,
-    KC_LEND
+    KC_LEND,
+    KC_VICTIM
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -69,7 +66,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 /* RAISE
  * ,----------------------------------------.                    ,-----------------------------------------.
- * |QK_BOOT|      |      |      |      |      |                   |ACToggle |      |      |      |      |      |
+ * |QK_BOOT|      |      |      |      |      |                   |ACToggle |      |      |      |      |   |
  * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
  * | Esc  | Ins  | Pscr | Menu | Caps | PgUp |                    |      | PWrd |  Up  | NWrd | DLine| Bspc |
  * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
@@ -90,11 +87,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 /* ADJUST
  * ,-----------------------------------------.                    ,-----------------------------------------.
- * |      |      |      |      |      |      |                    |      |      |      |      |      |      |
+ * |      |      |      |      |      |      |                    |      |      |      |      |      |victim |
  * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
  * | QK_BOOT|      |QWERTY|COLEMAK|      |      |                    |      |      |      |      |      |      |
  * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
- * |      |      |MACWIN|      |      |      |-------.    ,-------|      | VOLDO| MUTE | VOLUP|      |      |
+ * |ACToggle |      |MACWIN|      |      |      |-------.    ,-------|      | VOLDO| MUTE | VOLUP|      |      |
  * |------+------+------+------+------+------|  MUTE |    |       |------+------+------+------+------+------|
  * |      |      |      |      |      |      |-------|    |-------|      | PREV | PLAY | NEXT |      |      |
  * `-----------------------------------------/       /     \      \-----------------------------------------'
@@ -103,10 +100,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *            `----------------------------------'           '------''---------------------------'
  */
   [_ADJUST] = LAYOUT(
-  XXXXXXX , XXXXXXX,  XXXXXXX ,  XXXXXXX , XXXXXXX, XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+  XXXXXXX , XXXXXXX,  XXXXXXX ,  XXXXXXX , XXXXXXX, XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_VICTIM,
   QK_BOOT  , XXXXXXX,KC_QWERTY, XXXXXXX, CG_TOGG,XXXXXXX,                     XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-  XXXXXXX , XXXXXXX,CG_TOGG, XXXXXXX,    XXXXXXX,  XXXXXXX,                     XXXXXXX, KC_VOLD, KC_MUTE, KC_VOLU, XXXXXXX, XXXXXXX,
-  XXXXXXX , XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX,  XXXXXXX, XXXXXXX,     XXXXXXX, XXXXXXX, KC_MPRV, KC_MPLY, KC_MNXT, XXXXXXX, XXXXXXX,
+  QK_AUTOCORRECT_TOGGLE , XXXXXXX,CG_TOGG, XXXXXXX,    XXXXXXX,  XXXXXXX,                     XXXXXXX, KC_VOLD, KC_MUTE, KC_VOLU, XXXXXXX, XXXXXXX,
+  XXXXXXX , XXXXXXX, XXXXXXX, XXXXXXX,    KC_VICTIM,  XXXXXXX, XXXXXXX,     XXXXXXX, XXXXXXX, KC_MPRV, KC_MPLY, KC_MNXT, XXXXXXX, XXXXXXX,
                    _______, _______, _______, _______, _______,     _______, _______, _______, _______, _______
   )
 };
@@ -133,6 +130,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
                 return false;
             }
+        break;
+        case KC_VICTIM:
+            if (record->event.pressed) {
+                SEND_STRING("!victim ");
+                register_code(KC_LCTL);
+                register_code(KC_V);
+            } else {
+                unregister_code(KC_V);
+                unregister_code(KC_LCTL);
+            }
+            return false;
         break;
 
         case KC_QWERTY:
@@ -254,6 +262,16 @@ void print_status_narrow_user(void) {
     oled_write(get_u8_str(get_current_wpm(), ' '), false);
 }
 
+void print_status_slave(void) {
+    oled_write_P(PSTR("AutoCorrect: "), false);
+    oled_write_ln_P(PSTR(autocorrect_is_enabled() ? "on" : "off"), false);
+
+    if (is_caps_word_on()) {
+        oled_write_ln_P(PSTR("CAPS_WORD on\n"), false);
+    }
+
+}
+
 bool oled_task_user(void) {
     if (last_input_activity_elapsed() > 10000) {
         oled_off();
@@ -265,7 +283,7 @@ bool oled_task_user(void) {
     if (is_keyboard_master()) {
         print_status_narrow_user();
     } else {
-        render_luna(1, 1);
+        print_status_slave();
     }
     return false;
 }
