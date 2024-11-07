@@ -69,20 +69,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 /* RAISE
  * ,----------------------------------------.                    ,-----------------------------------------.
- * |QK_BOOT|      |      |      |      |      |                   |      |      |      |      |      |      |
+ * |QK_BOOT|      |      |      |      |      |                   |ACToggle |      |      |      |      |      |
  * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
  * | Esc  | Ins  | Pscr | Menu | Caps | PgUp |                    |      | PWrd |  Up  | NWrd | DLine| Bspc |
  * |------+------+------+------+------+------|                    |------+------+------+------+------+------|
- * | Tab  | LAt  | LCtl |LShift|      | PgDn |-------.    ,-------|      | Left | Down | Rigth|  Del | Bspc |
+ * | Tab  | LAt  | LCtl |LShift|      | PgDn |-------.    ,-------|      | Left | Down | Right|  Del | Bspc |
  * |------+------+------+------+------+------|  MUTE |    |       |------+------+------+------+------+------|
- * |CapsWord | Undo |  Cut | Copy | Paste|      |-------|    |-------|      | LStr |      | LEnd |      | Shift|
+ * |CapsWord | Undo |  Cut | Copy | Paste|   |-------|    |-------|      | LStr |      | LEnd |      | Shift|
  * `-----------------------------------------/       /     \      \-----------------------------------------'
  *            | LGUI | LAlt | LCTR |LOWER | /Enter  /       \Space \  |RAISE | RCTR | RAlt | RGUI |
  *            |      |      |      |      |/       /         \      \ |      |      |      |      |
  *            `----------------------------------'           '------''---------------------------'
  */
 [_RAISE] = LAYOUT(
-  QK_BOOT, _______ , _______ , _______ , _______ , _______,             _______,  _______  , _______,  _______ ,  _______ ,_______,
+  QK_BOOT, _______ , _______ , _______ , _______ , _______,             QK_AUTOCORRECT_TOGGLE,  _______  , _______,  _______ ,  _______ ,_______,
   _______,  KC_INS,  KC_PSCR,   KC_APP,  KC_CAPS, KC_PGUP,              _______, KC_PRVWD,  KC_UP, KC_NXTWD,C(KC_BSPC), KC_BSPC,
   _______, KC_LALT,  KC_LCTL,  KC_LSFT,  XXXXXXX, KC_PGDN,              KC_LEFT, KC_DOWN,   KC_UP, KC_RGHT,  KC_DEL, KC_BSPC,
   QK_CAPS_WORD_TOGGLE, C(KC_Z), C(KC_X), C(KC_C), C(KC_V), XXXXXXX,  _______,       _______,  XXXXXXX, KC_LSTRT, XXXXXXX, KC_LEND,   XXXXXXX, _______,
