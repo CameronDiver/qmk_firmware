@@ -111,6 +111,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 uint32_t oled_timer = 0;
 
 bool shift_pressed = false;
+bool caps_word_on_user = false;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed) {
@@ -254,6 +255,7 @@ void print_status_narrow_user(void) {
             break;
         case _ADJUST:
             oled_write_P(PSTR("Adjust"), false);
+        break;
         default:
             oled_write_ln_P(PSTR("Undef"), false);
     }
@@ -263,13 +265,11 @@ void print_status_narrow_user(void) {
 }
 
 void print_status_slave(void) {
-    oled_write_P(PSTR("AutoCorrect: "), false);
+    oled_write_P(PSTR("Auto\nCorr:\n"), false);
     oled_write_ln_P(PSTR(autocorrect_is_enabled() ? "on" : "off"), false);
 
-    if (is_caps_word_on()) {
-        oled_write_ln_P(PSTR("CAPS_WORD on\n"), false);
-    }
-
+    oled_write_ln_P(PSTR("CAPS\nWORD:\n"), false);
+    oled_write_ln_P(PSTR(caps_word_on_user ? "on" : "off"), false);
 }
 
 bool oled_task_user(void) {
@@ -286,4 +286,8 @@ bool oled_task_user(void) {
         print_status_slave();
     }
     return false;
+}
+
+void caps_word_set_user(bool active) {
+    caps_word_on_user = active;
 }
