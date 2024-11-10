@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include QMK_KEYBOARD_H
 
+#include "split_common/transactions.h"
+
+#include "0xCD.h"
+// Using SRC += seems super buggy
+#include "state_sync.c"
+
 enum sofle_layers {
     /* _M_XYZ = Mac Os, _W_XYZ = Win/Linux */
     _QWERTY,
@@ -265,11 +271,13 @@ void print_status_narrow_user(void) {
 }
 
 void print_status_slave(void) {
-    oled_write_P(PSTR("Auto\nCorr:\n"), false);
-    oled_write_ln_P(PSTR(autocorrect_is_enabled() ? "on" : "off"), false);
+    oled_write_P(PSTR("AutoCorrect: "), false);
+    oled_write_ln_P(PSTR(state_sync_is_ac_on() ? "on" : "off"), false);
 
-    oled_write_ln_P(PSTR("CAPS\nWORD:\n"), false);
-    oled_write_ln_P(PSTR(caps_word_on_user ? "on" : "off"), false);
+    if (state_sync_capsword_on()) {
+        oled_write_ln_P(PSTR("CAPS_WORD on\n"), false);
+    }
+
 }
 
 bool oled_task_user(void) {
@@ -288,6 +296,15 @@ bool oled_task_user(void) {
     return false;
 }
 
-void caps_word_set_user(bool active) {
-    caps_word_on_user = active;
+// Init
+void register_post_init_user(void) {
+    // Register the RPC sync process
+    transaction_register_rpc(RPC_ID_SYNC_STATE_KB, kb_state_sync_slave);
+
+    state_sync_init();
+}
+
+void housekeeping_task_user(void) {
+    state_sync_kb_state_update();
+    kb_state_sync();
 }
