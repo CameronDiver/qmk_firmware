@@ -288,6 +288,9 @@ bool oled_task_user(void) {
         oled_on();
     }
 
+    // state_sync_kb_state_update();
+    // kb_state_sync();
+
     if (is_keyboard_master()) {
         print_status_narrow_user();
     } else {
@@ -297,14 +300,14 @@ bool oled_task_user(void) {
 }
 
 // Init
-void register_post_init_user(void) {
+void keyboard_post_init_user(void) {
     // Register the RPC sync process
     transaction_register_rpc(RPC_ID_SYNC_STATE_KB, kb_state_sync_slave);
 
     state_sync_init();
 }
 
-void housekeeping_task_user(void) {
+void housekeeping_task_kb(void) {
     state_sync_kb_state_update();
     kb_state_sync();
 }
